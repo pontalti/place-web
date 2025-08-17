@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: place-web:latest
+    container_name: place-web-ssr
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - HOST=0.0.0.0
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:4000/"]
+      interval: 10s
+      timeout: 3s
+      retries: 10

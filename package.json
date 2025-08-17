@@ -2,12 +2,12 @@
   "name": "place-web",
   "version": "0.0.0",
   "scripts": {
-    "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "serve:ssr:place-web": "node dist/place-web/server/server.mjs"
+    "build:ssr": "ng build",
+    "dev:ssr": "ng run place-web:serve-ssr",
+    "serve:ssr": "node dist/place-web/server/server.mjs",
+    "prerender": "ng run place-web:prerender"
   },
   "prettier": {
     "overrides": [
@@ -21,10 +21,13 @@
   },
   "private": true,
   "dependencies": {
+    "@angular/animations": "~20.1",
+    "@angular/cdk": "~20.1",
     "@angular/common": "^20.1.0",
     "@angular/compiler": "^20.1.0",
     "@angular/core": "^20.1.0",
     "@angular/forms": "^20.1.0",
+    "@angular/material": "~20.1",
     "@angular/platform-browser": "^20.1.0",
     "@angular/platform-server": "^20.1.0",
     "@angular/router": "^20.1.0",

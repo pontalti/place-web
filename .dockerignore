@@ -1,0 +1,10 @@
+# .dockerignore
+.git
+.github
+node_modules
+dist
+npm-debug.log
+Dockerfile
+.dockerignore
+apache-vhost.conf
+entrypoint.sh
