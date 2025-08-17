@@ -1,30 +1,82 @@
-# PlaceWeb
+# 🚀 PlaceWeb
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.5.
+Welcome to **PlaceWeb**! This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 20.1.5.
+
+![An image of a modern web application interface, perhaps showing a map with location pins or a clean, responsive design.](https://via.placeholder.com/800x300.png?text=PlaceWeb+Application)
+
+---
+
+## ✨ Features
+
+* **Live Reload:** The application automatically reloads when you change any of the source files.
+* **Code Scaffolding:** Easily generate new components, directives, pipes, and more.
+* **Optimized Builds:** Production builds are optimized for speed and performance.
+* **Integrated Testing:** Run unit and end-to-end tests with simple commands.
+
+---
+
+## 📋 Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+* [Node.js](https://nodejs.org/) (which includes npm)
+* [Angular CLI](https://angular.io/cli)
+
+---
+
+## 🏁 Getting Started
+
+To get a local copy up and running, follow these simple steps.
+
+### **Installation**
+
+1.  **Clone the repo:**
+    ```bash
+    git clone [https://github.com/your_username/PlaceWeb.git](https://github.com/your_username/PlaceWeb.git)
+    ```
+2.  **Navigate to the project directory:**
+    ```bash
+    cd PlaceWeb
+    ```
+3.  **Install NPM packages:**
+    ```bash
+    npm install
+    ```
+---
+
+---
+
+## 🐳 Running with Docker
+
+Follow these steps to run the application using Docker Compose.
+
+**1. Build the Docker compose (without cache):**
+```bash
+docker compose build --no-cache
+```
+
+**2. Running the Docker compose:**
+```bash
+docker compose up -d
+```
+
+**2. Checking the Docker compose log:**
+```bash
+docker-compose logs -f 
+```
+
+---
+
 
 ## Development server
 
 To start a local development server, run:
 
 ```bash
-ng serve
+ng serve --open
 ```
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
 
 ## Building
 
