@@ -2,8 +2,6 @@
 
 Welcome to **PlaceWeb**! This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 20.1.5.
 
-![An image of a modern web application interface, perhaps showing a map with location pins or a clean, responsive design.](https://via.placeholder.com/800x300.png?text=PlaceWeb+Application)
-
 ---
 
 ## ✨ Features
@@ -42,7 +40,6 @@ To get a local copy up and running, follow these simple steps.
     ```bash
     npm install
     ```
----
 
 ---
 
@@ -109,3 +106,5 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+---
