@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 
 @Component({
@@ -8,6 +8,7 @@ import { MatCardModule } from '@angular/material/card';
   template: `
       <span class="mat-title-medium title"><h1> {{ title() }} </h1></span>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .title {
       text-align: center;

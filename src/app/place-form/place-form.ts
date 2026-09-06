@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
@@ -53,6 +53,7 @@ const HHMM_PATTERN = /^(\d{2}):(\d{2})$/;
     MatProgressSpinnerModule
   ],
   templateUrl: './place-form.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './place-form.scss'
 })
 export class PlaceFormComponent {

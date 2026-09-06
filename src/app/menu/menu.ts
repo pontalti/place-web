@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
@@ -40,6 +40,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .menu-shell { height: 100vh; }
     .menu-sidenav { width: 280px; }
