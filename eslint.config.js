@@ -9,12 +9,26 @@ module.exports = defineConfig([
     files: ["**/*.ts"],
     extends: [
       eslint.configs.recommended,
-      tseslint.configs.recommended,
-      tseslint.configs.stylistic,
+      // As variantes *TypeChecked habilitam as regras que consultam o
+      // compilador — entre elas as no-unsafe-*, que pegam o `any` que
+      // entra pela borda (retorno de lib sem tipagem, JSON.parse, etc).
+      tseslint.configs.recommendedTypeChecked,
+      tseslint.configs.stylisticTypeChecked,
       angular.configs.tsRecommended,
     ],
+    languageOptions: {
+      parserOptions: {
+        // Necessário para as regras type-aware acima: sem isto o ESLint
+        // não tem acesso ao programa do TypeScript e falha.
+        projectService: true,
+        tsconfigRootDir: __dirname,
+      },
+    },
     processor: angular.processInlineTemplates,
     rules: {
+      // O tsconfig cobre o `any` implícito; esta regra cobre o explícito.
+      "@typescript-eslint/no-explicit-any": "error",
+
       "@angular-eslint/directive-selector": [
         "error",
         {
@@ -40,5 +54,16 @@ module.exports = defineConfig([
       angular.configs.templateAccessibility,
     ],
     rules: {},
-  }
+  },
+  {
+    // Specs geram muito ruído type-aware (mocks, spies, fixtures).
+    // Este bloco vem por último para sobrescrever os anteriores.
+    files: ["**/*.spec.ts"],
+    rules: {
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+    },
+  },
 ]);
