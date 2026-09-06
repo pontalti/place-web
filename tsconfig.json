@@ -4,6 +4,8 @@
   "compileOnSave": false,
   "compilerOptions": {
     "strict": true,
+    "noUncheckedIndexedAccess": true,   // arr[i] e obj[key] viram T | undefined
+    "exactOptionalPropertyTypes": true,  // { a?: string } não aceita a: undefined
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
@@ -13,14 +15,18 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
-    "module": "preserve"
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "forceConsistentCasingInFileNames": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "typeCheckHostBindings": true,
-    "strictTemplates": true
+    "strictTemplates": true,
+    "strictStandalone": true,
+    "extendedDiagnostics": { "defaultCategory": "error" }
   },
   "files": [],
   "references": [
@@ -30,5 +36,10 @@
     {
       "path": "./tsconfig.spec.json"
     }
-  ]
+  ],
+  "options": {
+  "prebundle": {
+    "exclude": []
+  }
+}
 }

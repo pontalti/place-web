@@ -1,0 +1,65 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.space-between {
+  justify-content: space-between;
+  align-items: center;
+}
+.flex {
+  flex: 1 1 320px;
+}
+.days {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.day {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.dow {
+  width: 180px;
+}
+.type {
+  width: 140px;
+}
+.time {
+  width: 140px;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+}
+.mt-16 {
+  margin-top: 16px;
+}
+.mb-12 {
+  margin-bottom: 12px;
+}
+.m0 {
+  margin: 0;
+}
+.preview {
+  white-space: pre-wrap;
+}
+.spinner {
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.errors {
+  width: 100%;
+}
+.error {
+  color: #d32f2f;
+  font-size: 12px;
+}
