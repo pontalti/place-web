@@ -3,6 +3,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "esModuleInterop": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,   // arr[i] e obj[key] viram T | undefined
     "exactOptionalPropertyTypes": true,  // { a?: string } não aceita a: undefined
