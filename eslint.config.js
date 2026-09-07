@@ -29,6 +29,17 @@ module.exports = defineConfig([
       // O tsconfig cobre o `any` implícito; esta regra cobre o explícito.
       "@typescript-eslint/no-explicit-any": "error",
 
+      // Falso positivo em componentes: o processador de template inline
+      // sinaliza chamadas como `control.hasError(...)` no template como
+      // método desacoplado, mas o Angular sempre invoca com o receiver
+      // correto. Não há risco real de `this` perdido aqui.
+      "@typescript-eslint/unbound-method": "off",
+
+      // Desligada enquanto a migração para OnPush não é feita.
+      // Reative depois de trocar `ChangeDetectionStrategy.Default` por
+      // OnPush (ou de remover a linha, já que OnPush é o padrão no v21).
+      "@angular-eslint/prefer-on-push-component-change-detection": "off",
+
       "@angular-eslint/directive-selector": [
         "error",
         {

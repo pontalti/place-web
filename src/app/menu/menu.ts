@@ -51,12 +51,12 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 export class MenuComponent {
   @ViewChild('sidenav') sidenav!: MatSidenav;
 
-  open()   { this.sidenav.open(); }
-  close()  { this.sidenav.close(); }
-  toggle() { this.sidenav.toggle(); }
-  closeIfOver() {
+  open() : void{ void this.sidenav.open(); }
+  close() : void { void this.sidenav.close(); }
+  toggle() : void { void this.sidenav.toggle(); }
+  closeIfOver() : void {
     if(this.sidenav.mode === 'over') {
-      this.sidenav.close();
+      void this.sidenav.close();
     }
   }
 }

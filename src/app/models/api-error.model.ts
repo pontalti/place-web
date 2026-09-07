@@ -14,6 +14,6 @@ export function isApiError(value: unknown): value is ApiError {
     typeof value === 'object' &&
     value !== null &&
     'message' in value &&
-    typeof (value as { message: unknown }).message === 'string'
+    typeof (value).message === 'string'
   );
 }
