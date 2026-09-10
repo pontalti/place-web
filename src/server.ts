@@ -10,7 +10,29 @@ import { join } from 'node:path';
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
-const angularApp = new AngularNodeAppEngine();
+/**
+ * Angular 22 validates the `Host` header against an allowlist to prevent SSRF,
+ * and discards the `Forwarded` and all `X-Forwarded-*` headers by default.
+ *
+ * Behind Apache (docker/apache-vhost.conf) we need to trust those headers so
+ * the app sees the client's original host and protocol rather than the ones
+ * from the internal proxy.
+ *
+ * The allowed host list comes from `security.allowedHosts` in angular.json;
+ * `NG_ALLOWED_HOSTS` can extend it at runtime without a rebuild.
+ */
+const angularApp = new AngularNodeAppEngine({
+  trustProxyHeaders: [
+    'x-forwarded-host',
+    'x-forwarded-proto',
+    'x-forwarded-port',
+    // Sent by Apache's mod_proxy on every request. Without them on the list,
+    // Angular drops them and logs a warning. x-forwarded-for is the one that
+    // carries the client's real IP.
+    'x-forwarded-for',
+    'x-forwarded-server',
+  ],
+});
 
 /**
  * Example Express Rest API endpoints can be defined here.

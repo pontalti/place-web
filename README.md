@@ -54,12 +54,12 @@ docker compose build --no-cache
 
 **2. Running the Docker compose:**
 ```bash
-docker compose up -d
+docker compose up -d
 ```
 
 **2. Checking the Docker compose log:**
 ```bash
-docker-compose logs -f 
+docker compose logs -f
 ```
 
 ---
