@@ -27,8 +27,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
           </a>
 
           <a mat-list-item routerLink="/place/new" routerLinkActive="active" (click)="closeIfOver()">
-            <mat-icon aria-hidden="true">add_location</mat-icon>
+            <mat-icon aria-hidden="true">add</mat-icon>
             <span>New place</span>
+          </a>
+
+          <a mat-list-item routerLink="/place/list" routerLinkActive="active" (click)="closeIfOver()">
+            <mat-icon aria-hidden="true">list</mat-icon>
+            <span>Place list</span>
           </a>
 
         </mat-nav-list>
