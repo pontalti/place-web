@@ -150,7 +150,7 @@ export class PlaceFormComponent {
     this.saving.set(true);
 
     this.http
-      .post<PlaceResponse[]>(this.endpoint, [this.payload()])
+      .post<PlaceResponse>(this.endpoint, this.payload())
       .pipe(
         // finalize runs on success, error and cancellation
         finalize(() => this.saving.set(false)),
