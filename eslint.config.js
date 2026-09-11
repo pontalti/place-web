@@ -9,35 +9,35 @@ module.exports = defineConfig([
     files: ["**/*.ts"],
     extends: [
       eslint.configs.recommended,
-      // As variantes *TypeChecked habilitam as regras que consultam o
-      // compilador — entre elas as no-unsafe-*, que pegam o `any` que
-      // entra pela borda (retorno de lib sem tipagem, JSON.parse, etc).
+      // The *TypeChecked variants enable the rules that consult the
+      // compiler — among them the no-unsafe-* ones, which catch `any`
+      // coming in from the edges (untyped lib returns, JSON.parse, etc).
       tseslint.configs.recommendedTypeChecked,
       tseslint.configs.stylisticTypeChecked,
       angular.configs.tsRecommended,
     ],
     languageOptions: {
       parserOptions: {
-        // Necessário para as regras type-aware acima: sem isto o ESLint
-        // não tem acesso ao programa do TypeScript e falha.
+        // Required by the type-aware rules above: without it ESLint has
+        // no access to the TypeScript program and fails.
         projectService: true,
         tsconfigRootDir: __dirname,
       },
     },
     processor: angular.processInlineTemplates,
     rules: {
-      // O tsconfig cobre o `any` implícito; esta regra cobre o explícito.
+      // The tsconfig covers implicit `any`; this rule covers the explicit one.
       "@typescript-eslint/no-explicit-any": "error",
 
-      // Falso positivo em componentes: o processador de template inline
-      // sinaliza chamadas como `control.hasError(...)` no template como
-      // método desacoplado, mas o Angular sempre invoca com o receiver
-      // correto. Não há risco real de `this` perdido aqui.
+      // False positive in components: the inline template processor flags
+      // calls such as `control.hasError(...)` in the template as detached
+      // methods, but Angular always invokes them with the right receiver.
+      // There is no real risk of a lost `this` here.
       "@typescript-eslint/unbound-method": "off",
 
-      // Desligada enquanto a migração para OnPush não é feita.
-      // Reative depois de trocar `ChangeDetectionStrategy.Default` por
-      // OnPush (ou de remover a linha, já que OnPush é o padrão no v21).
+      // Off until the OnPush migration is done.
+      // Re-enable after replacing `ChangeDetectionStrategy.Default` with
+      // OnPush (or removing the line, since OnPush is the default in v21).
       "@angular-eslint/prefer-on-push-component-change-detection": "off",
 
       "@angular-eslint/directive-selector": [
@@ -67,8 +67,8 @@ module.exports = defineConfig([
     rules: {},
   },
   {
-    // Specs geram muito ruído type-aware (mocks, spies, fixtures).
-    // Este bloco vem por último para sobrescrever os anteriores.
+    // Specs generate a lot of type-aware noise (mocks, spies, fixtures).
+    // This block comes last so it overrides the previous ones.
     files: ["**/*.spec.ts"],
     rules: {
       "@typescript-eslint/no-unsafe-assignment": "off",

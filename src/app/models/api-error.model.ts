@@ -1,19 +1,19 @@
-/** Corpo de erro devolvido pelo @ExceptionHandler do backend. */
+/** Error body returned by the backend's @ExceptionHandler. */
 export interface ApiError {
   message: string;
   details?: string[];
 }
 
 /**
- * Type guard: confirma o formato do corpo de erro antes de usá-lo.
- * Necessário porque `HttpErrorResponse.error` é `any` — a checagem em
- * runtime é o que impede esse `any` de escapar para o resto do código.
+ * Type guard: confirms the error body's shape before using it.
+ * Needed because `HttpErrorResponse.error` is `any` — the runtime check
+ * is what keeps that `any` from leaking into the rest of the code.
  */
 export function isApiError(value: unknown): value is ApiError {
   return (
     typeof value === 'object' &&
     value !== null &&
     'message' in value &&
-    typeof (value).message === 'string'
+    typeof value.message === 'string'
   );
 }

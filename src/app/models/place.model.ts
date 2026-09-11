@@ -1,5 +1,5 @@
 /**
- * Contratos do recurso Place, espelhando os records do backend
+ * Contracts for the Place resource, mirroring the backend records
  * (PlaceRecord / GroupedPlaceRecord).
  */
 
@@ -14,7 +14,7 @@ export type DayOfWeek =
   | 'saturday'
   | 'sunday';
 
-/** Ordem canônica dos dias, usada no select do formulário. */
+/** Canonical day order, used by the form's select. */
 export const DAYS_OF_WEEK: readonly DayOfWeek[] = [
   'monday',
   'tuesday',
@@ -25,7 +25,7 @@ export const DAYS_OF_WEEK: readonly DayOfWeek[] = [
   'sunday'
 ] as const;
 
-// --- REQUEST: o que o formulário envia. Sem `id`: quem gera é o backend. ---
+// --- REQUEST: what the form sends. No `id`: the backend generates it. ---
 
 export interface DayItem {
   dayOfWeek: DayOfWeek;
@@ -40,7 +40,7 @@ export interface PlacePayload {
   days: DayItem[];
 }
 
-// --- RESPONSE: o que o backend devolve, já com os ids persistidos. ---
+// --- RESPONSE: what the backend returns, with the persisted ids. ---
 
 export interface DayResponse extends DayItem {
   id: number;

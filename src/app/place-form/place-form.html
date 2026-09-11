@@ -1,5 +1,5 @@
 <mat-card>
-  <h2>Novo Local</h2>
+  <h2>New Place</h2>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
     <div class="row">
@@ -7,7 +7,7 @@
         <mat-label>Label</mat-label>
         <input matInput formControlName="label" required />
         @if (form.controls.label.hasError('required')) {
-          <mat-error>Obrigatório.</mat-error>
+          <mat-error>Required.</mat-error>
         }
       </mat-form-field>
 
@@ -15,7 +15,7 @@
         <mat-label>Location</mat-label>
         <input matInput formControlName="location" required />
         @if (form.controls.location.hasError('required')) {
-          <mat-error>Obrigatório.</mat-error>
+          <mat-error>Required.</mat-error>
         }
       </mat-form-field>
     </div>
@@ -23,9 +23,9 @@
     <mat-divider class="mb-12"></mat-divider>
 
     <div class="row space-between">
-      <h3 class="m0">Dias / Horários</h3>
+      <h3 class="m0">Days / Opening hours</h3>
       <button mat-raised-button color="primary" type="button" (click)="addDay()">
-        <mat-icon>add</mat-icon> Adicionar faixa
+        <mat-icon>add</mat-icon> Add slot
       </button>
     </div>
 
@@ -33,41 +33,41 @@
       @for (group of days.controls; track trackDay($index, group); let i = $index) {
         <div class="day" [formGroupName]="i">
           <mat-form-field appearance="outline" class="dow">
-            <mat-label>Dia da semana</mat-label>
+            <mat-label>Day of week</mat-label>
             <mat-select formControlName="dayOfWeek" required>
               @for (d of daysOfWeek; track d) {
                 <mat-option [value]="d">{{ d }}</mat-option>
               }
             </mat-select>
             @if (group.controls.dayOfWeek.hasError('required')) {
-              <mat-error>Obrigatório.</mat-error>
+              <mat-error>Required.</mat-error>
             }
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="time">
-            <mat-label>Início</mat-label>
+            <mat-label>Start</mat-label>
             <input matInput type="time" formControlName="startTime" required />
             @if (group.controls.startTime.hasError('required')) {
-              <mat-error>Obrigatório.</mat-error>
+              <mat-error>Required.</mat-error>
             }
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="time">
-            <mat-label>Fim</mat-label>
+            <mat-label>End</mat-label>
             <input matInput type="time" formControlName="endTime" required />
             @if (group.controls.endTime.hasError('required')) {
-              <mat-error>Obrigatório.</mat-error>
+              <mat-error>Required.</mat-error>
             }
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="type">
-            <mat-label>Tipo</mat-label>
+            <mat-label>Type</mat-label>
             <mat-select formControlName="type" required>
               <mat-option value="OPEN">OPEN</mat-option>
               <mat-option value="CLOSED">CLOSED</mat-option>
             </mat-select>
             @if (group.controls.type.hasError('required')) {
-              <mat-error>Obrigatório.</mat-error>
+              <mat-error>Required.</mat-error>
             }
           </mat-form-field>
 
@@ -76,7 +76,7 @@
             color="warn"
             type="button"
             (click)="removeDay(i)"
-            aria-label="Remover faixa"
+            aria-label="Remove slot"
           >
             <mat-icon>delete</mat-icon>
           </button>
@@ -85,11 +85,11 @@
             <div class="errors">
               @if (group.hasError('range')) {
                 <span class="error">
-                  Horário inválido: o fim deve ser depois do início (use 00:00 para meia-noite).
+                  Invalid time: the end must be after the start (use 00:00 for midnight).
                 </span>
               }
               @if (group.hasError('overlap')) {
-                <span class="error"> Conflito com outra faixa deste dia. </span>
+                <span class="error"> Conflicts with another slot on this day. </span>
               }
             </div>
           }
@@ -100,7 +100,7 @@
     @if (days.hasError('overlap')) {
       <div class="errors">
         <span class="error">
-          Existem conflitos de horário no mesmo dia. Ajuste as faixas.
+          There are time conflicts on the same day. Adjust the slots.
         </span>
       </div>
     }
@@ -109,19 +109,19 @@
       <button mat-raised-button color="primary" [disabled]="form.invalid || saving()">
         @if (saving()) {
           <mat-spinner diameter="18" class="spinner"></mat-spinner>
-          Salvando...
+          Saving...
         } @else {
-          Salvar
+          Save
         }
       </button>
       <button mat-stroked-button type="button" [disabled]="saving()" (click)="reset()">
-        Limpar
+        Clear
       </button>
     </div>
   </form>
 </mat-card>
 
 <mat-card class="mt-16">
-  <h3 class="m0">Prévia do JSON</h3>
+  <h3 class="m0">JSON preview</h3>
   <pre class="preview">{{ payload() | json }}</pre>
 </mat-card>

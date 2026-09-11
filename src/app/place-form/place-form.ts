@@ -61,19 +61,19 @@ export class PlaceFormComponent {
   private readonly snack = inject(MatSnackBar);
   private readonly destroyRef = inject(DestroyRef);
 
-  // Base da API vem do environment: /api em dev (via proxy) e em produção.
+  // API base comes from the environment: /api in dev (through the proxy) and in production.
   private readonly endpoint = `${environment.apiUrl}/place`;
 
   readonly daysOfWeek = DAYS_OF_WEEK;
 
-  /** true enquanto um POST está em voo — bloqueia envios duplicados. */
+  /** true while a POST is in flight — blocks duplicate submissions. */
   readonly saving = signal(false);
 
   /**
-   * Identidade estável de cada faixa, para o `track` do @for.
-   * Sem isso, `track group` recria todo o DOM quando o array é
-   * reconstruído (NG0956) e `track $index` desalinha os erros de
-   * validação ao remover uma faixa do meio da lista.
+   * Stable identity for each slot, used by the @for `track`.
+   * Without it, `track group` recreates the whole DOM whenever the array
+   * is rebuilt (NG0956), and `track $index` misaligns validation errors
+   * when a slot is removed from the middle of the list.
    */
   private nextDayId = 0;
   private readonly dayIds = new WeakMap<DayForm, number>();
@@ -98,7 +98,7 @@ export class PlaceFormComponent {
       })
     });
 
-    // começa com uma faixa exemplo
+    // start with one sample slot
     this.addDay();
   }
 
@@ -106,7 +106,7 @@ export class PlaceFormComponent {
     return this.form.controls.days;
   }
 
-  // --- MÉTODOS PÚBLICOS DO COMPONENTE ---
+  // --- PUBLIC COMPONENT METHODS ---
 
   addDay(): void {
     this.days.push(this.buildDay());
@@ -114,7 +114,7 @@ export class PlaceFormComponent {
 
   removeDay(index: number): void {
     this.days.removeAt(index);
-    this.days.updateValueAndValidity(); // reavalia overlaps
+    this.days.updateValueAndValidity(); // re-evaluate overlaps
   }
 
   reset(): void {
@@ -122,7 +122,7 @@ export class PlaceFormComponent {
     this.resetForm();
   }
 
-  /** Limpa o formulário sem o guard de `saving` — usado também após o POST. */
+  /** Clears the form without the `saving` guard — also used after the POST. */
   private resetForm(): void {
     this.form.reset();
     this.days.clear();
@@ -130,8 +130,8 @@ export class PlaceFormComponent {
   }
 
   payload(): PlacePayload {
-    // Com o formulário tipado, getRawValue() já devolve a forma correta:
-    // nenhum cast e nenhum `any` são necessários aqui.
+    // With the typed form, getRawValue() already returns the right shape:
+    // no cast and no `any` are needed here.
     const { label, location, days } = this.form.getRawValue();
     return { label, location, days };
   }
@@ -139,61 +139,61 @@ export class PlaceFormComponent {
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.snack.open('Há erros no formulário. Verifique os horários.', 'Fechar', {
+      this.snack.open('The form has errors. Check the opening hours.', 'Close', {
         duration: 3000
       });
       return;
     }
 
-    if (this.saving()) return; // guarda contra duplo clique / Enter repetido
+    if (this.saving()) return; // guards against double click / repeated Enter
 
     this.saving.set(true);
 
     this.http
       .post<PlaceResponse[]>(this.endpoint, [this.payload()])
       .pipe(
-        // finalize roda em sucesso, erro e cancelamento
+        // finalize runs on success, error and cancellation
         finalize(() => this.saving.set(false)),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
         next: () => {
           this.resetForm();
-          this.snack.open('Salvo com sucesso!', 'Fechar', { duration: 3000 });
+          this.snack.open('Saved successfully!', 'Close', { duration: 3000 });
         },
         error: (err: unknown) => {
           console.error(err);
-          this.snack.open(this.toErrorMessage(err), 'Fechar', { duration: 5000 });
+          this.snack.open(this.toErrorMessage(err), 'Close', { duration: 5000 });
         }
       });
   }
 
-  // --- MÉTODOS PRIVADOS E VALIDADORES ---
+  // --- PRIVATE METHODS AND VALIDATORS ---
 
   /**
-   * Traduz o erro para uma mensagem exibível.
-   * O parâmetro é `unknown` porque o RxJS não garante o tipo: além do
-   * HttpErrorResponse, qualquer exceção lançada no `next` ou num
-   * interceptor chega aqui. O narrowing é feito em runtime.
+   * Translates the error into a displayable message.
+   * The parameter is `unknown` because RxJS does not guarantee the type:
+   * besides HttpErrorResponse, any exception thrown in `next` or in an
+   * interceptor lands here. The narrowing happens at runtime.
    */
   private toErrorMessage(err: unknown): string {
     if (!(err instanceof HttpErrorResponse)) {
-      return 'Erro inesperado ao salvar.';
+      return 'Unexpected error while saving.';
     }
 
     if (err.status === 0) {
-      return 'Sem conexão com o servidor.';
+      return 'No connection to the server.';
     }
 
-    // err.error é `any` no HttpErrorResponse — reatribuir para `unknown`
-    // obriga a validação antes do uso e impede o `any` de escapar.
+    // err.error is `any` on HttpErrorResponse — reassigning it to `unknown`
+    // forces validation before use and keeps the `any` from escaping.
     const body: unknown = err.error;
     if (isApiError(body)) {
       const details = body.details?.length ? ` (${body.details.join('; ')})` : '';
       return `${body.message}${details}`;
     }
 
-    return `Falha ao salvar (HTTP ${err.status}).`;
+    return `Failed to save (HTTP ${err.status}).`;
   }
 
   private buildDay(): DayForm {
@@ -221,8 +221,8 @@ export class PlaceFormComponent {
 
     this.dayIds.set(group, this.nextDayId++);
 
-    // Revalida overlaps quando algum campo muda.
-    // takeUntilDestroyed evita que a inscrição sobreviva ao componente.
+    // Re-validate overlaps whenever a field changes.
+    // takeUntilDestroyed keeps the subscription from outliving the component.
     group.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.days.updateValueAndValidity({ onlySelf: true }));
@@ -230,13 +230,13 @@ export class PlaceFormComponent {
     return group;
   }
 
-  /** Helpers de tempo */
+  /** Time helpers */
   private toMinutes(hhmm: string | null | undefined): number | null {
     const match = HHMM_PATTERN.exec(hhmm ?? '');
     if (match === null) return null;
 
-    // Os grupos 1 e 2 existem sempre que o regex casa, mas com
-    // noUncheckedIndexedAccess é preciso comprovar isso ao compilador.
+    // Groups 1 and 2 always exist when the regex matches, but with
+    // noUncheckedIndexedAccess that has to be proven to the compiler.
     const [, rawHours, rawMinutes] = match;
     if (rawHours === undefined || rawMinutes === undefined) return null;
 
@@ -247,21 +247,21 @@ export class PlaceFormComponent {
     return hours * 60 + minutes;
   }
 
-  /** Trata "00:00" como 24:00 para representar fim-de-dia */
+  /** Treats "00:00" as 24:00 to represent end-of-day */
   private endToMinutes(hhmm: string | null | undefined): number | null {
     if (hhmm === '00:00') return 24 * 60;
     return this.toMinutes(hhmm);
   }
 
-  /** Validador por faixa (grupo) — garante início < fim e não iguais */
+  /** Per-slot (group) validator — ensures start < end and not equal */
   private dayRangeValidator(group: AbstractControl): ValidationErrors | null {
     const start = this.toMinutes(group.get('startTime')?.value as string | null);
     const end = this.endToMinutes(group.get('endTime')?.value as string | null);
-    if (start === null || end === null) return null; // required cuida disso
+    if (start === null || end === null) return null; // required takes care of this
     return end <= start ? { range: true } : null;
   }
 
-  /** Marca/limpa erro 'overlap' em grupos específicos */
+  /** Sets/clears the 'overlap' error on specific groups */
   private setGroupOverlapError(group: DayForm, hasError: boolean): void {
     const errors = { ...(group.errors ?? {}) };
 
@@ -278,7 +278,7 @@ export class PlaceFormComponent {
     }
   }
 
-  /** Agrupa as faixas válidas por dia da semana, já convertidas em minutos */
+  /** Groups the valid slots by day of week, already converted to minutes */
   private groupSlotsByDay(controls: readonly DayForm[]): Map<DayOfWeek, TimeSlot[]> {
     const byDay = new Map<DayOfWeek, TimeSlot[]>();
 
@@ -300,11 +300,11 @@ export class PlaceFormComponent {
     return byDay;
   }
 
-  /** Validador no FormArray (todas as faixas) — detecta overlaps por dia */
+  /** FormArray-level validator (all slots) — detects per-day overlaps */
   private daysNoOverlapValidator(array: AbstractControl): ValidationErrors | null {
     const controls = (array as FormArray<DayForm>).controls;
 
-    // Limpa marcas antigas
+    // Clear previous marks
     for (const group of controls) {
       this.setGroupOverlapError(group, false);
     }
@@ -312,9 +312,9 @@ export class PlaceFormComponent {
     let hasOverlap = false;
 
     for (const slots of this.groupSlotsByDay(controls).values()) {
-      // Comparação par a par: cobre também o caso de uma faixa
-      // conter inteiramente outra, que a varredura sequencial perdia.
-      // Intervalos [start, end) — end == start é permitido (faixas coladas).
+      // Pairwise comparison: also covers the case of one slot fully
+      // containing another, which the sequential scan used to miss.
+      // Intervals are [start, end) — end == start is allowed (adjacent slots).
       slots.forEach((current, index) => {
         for (const other of slots.slice(index + 1)) {
           if (current.start < other.end && other.start < current.end) {

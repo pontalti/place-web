@@ -2,7 +2,7 @@ import { FormArray, FormControl, FormGroup } from '@angular/forms';
 
 import { DayOfWeek, DayType } from '../models/place.model';
 
-/** Formulário tipado de uma faixa de horário. */
+/** Typed form for a single time slot. */
 export type DayForm = FormGroup<{
   dayOfWeek: FormControl<DayOfWeek>;
   startTime: FormControl<string>;
@@ -10,14 +10,14 @@ export type DayForm = FormGroup<{
   type: FormControl<DayType>;
 }>;
 
-/** Formulário tipado do local. */
+/** Typed form for the place. */
 export type PlaceForm = FormGroup<{
   label: FormControl<string>;
   location: FormControl<string>;
   days: FormArray<DayForm>;
 }>;
 
-/** Faixa já normalizada em minutos, usada na detecção de conflitos. */
+/** Slot already normalized to minutes, used for overlap detection. */
 export interface TimeSlot {
   start: number;
   end: number;
