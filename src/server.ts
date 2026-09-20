@@ -7,7 +7,16 @@ import {
 import express from 'express';
 import { join } from 'node:path';
 
+import { apiProxy } from './api-proxy';
+
 const browserDistFolder = join(import.meta.dirname, '../browser');
+
+/**
+ * Backend the `/api` calls are forwarded to. Inside docker compose the
+ * service name resolves (`http://api:8080`); the default covers running the
+ * SSR server on the host against a local backend.
+ */
+const apiTarget = process.env['API_TARGET'] ?? 'http://localhost:8080';
 
 const app = express();
 /**
@@ -35,16 +44,17 @@ const angularApp = new AngularNodeAppEngine({
 });
 
 /**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
+ * Forward the API calls to the backend.
  *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
+ * Mounted first, and above all before the Angular handler: that one matches
+ * every path, so anything registered after it is never reached. What
+ * `proxy.conf.json` does for `ng serve`, this does for the built server —
+ * the production build never reads that file.
+ *
+ * Keeping both behind one origin is also what keeps CORS out of the picture:
+ * the browser only ever talks to this server.
  */
+app.use('/api', apiProxy(apiTarget));
 
 /**
  * Serve static files from /browser
@@ -82,6 +92,7 @@ if (isMainModule(import.meta.url)) {
     }
 
     console.log(`Node Express server listening on http://localhost:${port}`);
+    console.log(`Proxying /api to ${apiTarget}`);
   });
 }
 

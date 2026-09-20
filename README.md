@@ -2,6 +2,9 @@
 
 Welcome to **PlaceWeb**! This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 20.1.5.
 
+It is the Angular front end for the [Place](https://github.com/pontalti/place) API
+(branch `feature/springboot`), and runs with server-side rendering (SSR).
+
 ---
 
 ## ✨ Features
@@ -10,6 +13,7 @@ Welcome to **PlaceWeb**! This project was generated with [Angular CLI](https://g
 * **Code Scaffolding:** Easily generate new components, directives, pipes, and more.
 * **Optimized Builds:** Production builds are optimized for speed and performance.
 * **Integrated Testing:** Run unit and end-to-end tests with simple commands.
+* **Server-side rendering:** Served by an Express server that also forwards `/api` to the backend.
 
 ---
 
@@ -19,6 +23,7 @@ Before you begin, ensure you have the following installed:
 
 * [Node.js](https://nodejs.org/) (which includes npm)
 * [Angular CLI](https://angular.io/cli)
+* [Docker](https://docs.docker.com/) — only for the Docker Compose setup
 
 ---
 
@@ -45,7 +50,10 @@ To get a local copy up and running, follow these simple steps.
 
 ## 🐳 Running with Docker
 
-Follow these steps to run the application using Docker Compose.
+Compose builds both containers: the backend is cloned and built from the
+`feature/springboot` branch of the API repository, and the front end is built
+from this one. The front end waits for the backend's health check, so the
+first `up` takes a few minutes.
 
 **1. Build the Docker compose (without cache):**
 ```bash
@@ -57,17 +65,50 @@ docker compose build --no-cache
 docker compose up -d
 ```
 
-**2. Checking the Docker compose log:**
+**3. Checking the Docker compose log:**
 ```bash
 docker compose logs -f
 ```
 
----
+**4. Stopping everything:**
+```bash
+docker compose down
+```
 
+### 🌐 Where to access it
+
+| | |
+| :--- | :--- |
+| **Application** ...... | http://localhost:4200 |
+| **Place list** ...... | http://localhost:4200/place/list |
+| **New place** ...... | http://localhost:4200/place/new |
+| **API (direct)** ...... | http://localhost:8080/api/v1/place |
+| **Swagger UI** ...... | http://localhost:8080/swagger-ui/index.html |
+| **H2 console** ...... | http://localhost:8080/h2 |
+| **Remote debug (JVM)** ...... | localhost:8000 |
+
+The SSR server listens on port 4000 inside its container and is published on
+**4200**, so the address is the same one used by `ng serve`.
+
+### 🔌 How the front end reaches the API
+
+The browser always calls the relative path `/api/v1/...`, never the backend
+directly. What resolves it differs per environment:
+
+| | |
+| :--- | :--- |
+| **`ng serve`** ...... | `proxy.conf.json` → `http://localhost:8080` |
+| **Docker / SSR** ...... | `src/api-proxy.ts`, mounted in `src/server.ts` → `$API_TARGET` (`http://api:8080`) |
+
+Because both are served from a single origin, CORS never comes into play. To
+point the SSR server somewhere else, set `API_TARGET` on the `web` service in
+`docker-compose.yml`.
+
+---
 
 ## Development server
 
-To start a local development server, run:
+Start the backend first (or `docker compose up -d api`), then:
 
 ```bash
 ng serve --open

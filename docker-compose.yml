@@ -1,20 +1,67 @@
 services:
-  app:
+  # ---------- backend ----------
+  api:
     build:
       context: .
-      dockerfile: docker/Dockerfile
-    image: place-web:latest
-    container_name: place-web-ssr
+      dockerfile: docker/backend/app.dockerfile
+      args:
+        # The Spring Boot code lives on its own branch; main is only a README.
+        GIT_REF: feature/springboot
+        # Bust the clone's cache so a rebuild picks up new commits:
+        #   docker compose build --build-arg CACHE_BUST=$(date +%s) api
+        CACHE_BUST: "0"
+    image: place:latest
+    container_name: place-api
     restart: unless-stopped
     ports:
       - "8080:8080"
+      - "8000:8000"
+    healthcheck:
+      # wget comes with busybox in the alpine JRE image; curl does not.
+      # The endpoint answers 200 with an array, which is enough of a signal
+      # that the context is up and Flyway has run.
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/api/v1/place"]
+      interval: 10s
+      timeout: 3s
+      # Failures during this window do not count: the JVM takes a while.
+      start_period: 40s
+      retries: 10
+    networks:
+      - place-network
+
+  # ---------- frontend ----------
+  web:
+    build:
+      context: .
+      dockerfile: docker/ui/app.dockerfile
+    image: place-web:latest
+    container_name: place-web-ssr
+    restart: unless-stopped
+    depends_on:
+      # service_healthy, not service_started: a running container says nothing
+      # about the API answering requests.
+      api:
+        condition: service_healthy
+    ports:
+      # The SSR server listens on 4000 inside the container.
+      - "4200:4000"
     environment:
-      - NODE_ENV=production
-      - PORT=4000
-      - HOST=0.0.0.0
-      - NG_ALLOWED_HOSTS=localhost,127.0.0.1
+      NODE_ENV: production
+      PORT: "4000"
+      HOST: 0.0.0.0
+      NG_ALLOWED_HOSTS: localhost,127.0.0.1
+      # Where the SSR server should forward /api, if you add the proxy to
+      # server.ts. Inside the network the backend is reached by service name.
+      API_TARGET: http://api:8080
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:4000/"]
       interval: 10s
       timeout: 3s
+      start_period: 15s
       retries: 10
+    networks:
+      - place-network
+
+networks:
+  place-network:
+    driver: bridge
