@@ -1,0 +1,135 @@
+/* Utility classes shared with place-form.scss, so both screens read the same. */
+.row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.space-between {
+  justify-content: space-between;
+  align-items: center;
+}
+.m0 {
+  margin: 0;
+}
+
+/* Page frame: the card was running edge to edge against the toolbar. */
+.page {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.card {
+  padding: 0;
+  overflow: hidden;
+}
+.header {
+  padding: 16px 16px 8px;
+}
+.subtitle {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+/* Reserves the progress bar's height so the table never shifts. */
+.progress {
+  height: 4px;
+}
+
+.table-wrapper {
+  overflow: auto;
+  /* Keeps the paginator in view while a long page scrolls under the header. */
+  max-height: 65vh;
+}
+.table {
+  width: 100%;
+}
+
+th.mat-mdc-header-cell {
+  font-weight: 600;
+  white-space: nowrap;
+}
+tr.mat-mdc-row:hover {
+  background: rgb(0 0 0 / 4%);
+}
+
+/* Cells: the row is only as tall as the grouped schedule needs. */
+td.mat-mdc-cell {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  vertical-align: top;
+}
+.col-id {
+  width: 72px;
+}
+.col-hours {
+  width: 38%;
+}
+/* Action columns: only as wide as an icon button. */
+.col-action {
+  width: 56px;
+  text-align: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+/* Header label kept for screen readers, hidden on screen. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+.strong {
+  font-weight: 500;
+}
+.muted {
+  opacity: 0.7;
+}
+
+/* One line per group of days: "Mon – Fri   11:30–14:00, 18:30–22:00". */
+.hours {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hour-line {
+  display: flex;
+  gap: 12px;
+  line-height: 1.5;
+}
+.dow {
+  flex: 0 0 82px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.intervals {
+  font-variant-numeric: tabular-nums;
+}
+.hour-line.is-closed {
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.empty {
+  padding: 24px 16px;
+  text-align: center;
+  opacity: 0.7;
+}
+
+/* Below ~720px the table would only scroll sideways; stack the cells instead. */
+@media (max-width: 720px) {
+  .page {
+    padding: 8px;
+  }
+  .col-hours,
+  .col-id {
+    width: auto;
+  }
+  .dow {
+    flex-basis: 70px;
+  }
+}

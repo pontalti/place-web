@@ -1,8 +1,4 @@
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+/* Layout shared with place-list.scss: same frame, same header, same footer bar. */
 .row {
   display: flex;
   gap: 16px;
@@ -12,9 +8,62 @@
   justify-content: space-between;
   align-items: center;
 }
+.m0 {
+  margin: 0;
+}
+.mt-16 {
+  margin-top: 16px;
+}
+
+.page {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.card {
+  padding: 0;
+  overflow: hidden;
+}
+.header {
+  padding: 16px 16px 8px;
+}
+.subtitle {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+/* Reserves the progress bar's height so the form never shifts. */
+.progress {
+  height: 4px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+.body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .flex {
   flex: 1 1 320px;
 }
+.section-row {
+  margin-top: 8px;
+  gap: 12px;
+}
+.section {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* One slot per row, framed like a row of the list. */
 .days {
   display: flex;
   flex-direction: column;
@@ -25,6 +74,16 @@
   gap: 12px;
   align-items: center;
   flex-wrap: wrap;
+  padding: 12px 12px 0;
+  border: 1px solid rgb(0 0 0 / 8%);
+  border-radius: 8px;
+  background: rgb(0 0 0 / 2%);
+}
+.day.has-error {
+  border-color: #d32f2f;
+}
+.grow {
+  flex: 1 1 auto;
 }
 .dow {
   width: 180px;
@@ -35,31 +94,45 @@
 .time {
   width: 140px;
 }
-.actions {
+
+/* Footer bar: same edge and padding as the list's paginator. */
+.footer {
   display: flex;
   gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid rgb(0 0 0 / 8%);
 }
-.mt-16 {
-  margin-top: 16px;
-}
-.mb-12 {
-  margin-bottom: 12px;
-}
-.m0 {
-  margin: 0;
-}
-.preview {
-  white-space: pre-wrap;
-}
-.spinner {
-  display: inline-block;
-  margin-right: 8px;
-  vertical-align: middle;
-}
+
 .errors {
   width: 100%;
+  /* Pulls the message up into the space the outlined fields leave below. */
+  margin-top: -8px;
+  padding-bottom: 8px;
 }
 .error {
   color: #d32f2f;
   font-size: 12px;
+}
+.empty {
+  padding: 16px;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.preview {
+  margin: 0;
+  padding: 0 16px 16px;
+  white-space: pre-wrap;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 8px;
+  }
+  .dow,
+  .type,
+  .time {
+    width: 100%;
+  }
 }
