@@ -12,6 +12,20 @@ export interface OpeningGroup {
   closed: boolean;
 }
 
+/**
+ * Body of a partial update: the id plus only the fields that changed.
+ *
+ * <p>`days` is deliberately absent. The backend's applyDayPatches merges
+ * rather than replaces — a slot the payload omits stays in the database, and
+ * slots sent without an id are appended — so the opening hours are edited
+ * through the form's PUT, never from here.
+ */
+export interface PlacePatch {
+  id: number;
+  label?: string;
+  location?: string;
+}
+
 /** A place plus its precomputed weekly view — one table row. */
 export interface PlaceRow {
   place: PlaceResponse;

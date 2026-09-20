@@ -28,7 +28,13 @@ import { isApiError } from '../models/api-error.model';
 import { Page, PageQuery, SortDirection } from '../models/page.model';
 import { DayOfWeek, DayResponse, PlaceResponse } from '../models/place.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../shared/confirm-dialog';
-import { OpeningGroup, PlaceRow } from './place-list.types';
+import { OpeningGroup, PlacePatch, PlaceRow } from './place-list.types';
+import {
+  PlaceQuickEditDialogComponent,
+  QuickEditDialogData,
+  QuickEditField,
+  QuickEditResult
+} from './place-quick-edit-dialog';
 
 /** Same default as the backend's @PageableDefault(size = 20, sort = "label"). */
 const DEFAULT_QUERY: PageQuery = { page: 0, size: 20, sort: 'label', direction: 'asc' };
@@ -85,6 +91,8 @@ export class PlaceListComponent {
   readonly loading = signal(false);
   /** Id being deleted, so only that row's button shows the pending state. */
   readonly deletingId = signal<number | null>(null);
+  /** Id being patched, so only that row is greyed out while it is saved. */
+  readonly patchingId = signal<number | null>(null);
 
   /**
    * What the table renders. The weekly grouping is computed once per response
@@ -151,6 +159,42 @@ export class PlaceListComponent {
   }
 
   /**
+   * Edits the label and the location from the list, in two steps: the values
+   * are typed in one dialog, then a second one states what will change.
+   *
+   * <p>The confirmation is not ceremony here: the PATCH goes straight through,
+   * with no draft to review and no undo, and the summary is the only place the
+   * old and the new value are seen side by side.
+   *
+   * <p>Only the fields that actually changed are sent. That is what PATCH is
+   * for, and it keeps a field someone else edited meanwhile from being
+   * overwritten with a value that was merely displayed.
+   */
+  quickEdit(place: PlaceResponse, focus: QuickEditField): void {
+    if (this.patchingId() !== null) return;
+
+    const data: QuickEditDialogData = { place, focus };
+
+    this.dialog
+      .open<PlaceQuickEditDialogComponent, QuickEditDialogData, QuickEditResult>(
+        PlaceQuickEditDialogComponent,
+        { data, width: '420px' }
+      )
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => {
+        if (result === undefined) return; // cancelled
+
+        const patch = this.buildPatch(place, result);
+        if (patch === null) {
+          this.snack.open('Nothing changed.', 'Close', { duration: 3000 });
+          return;
+        }
+        this.confirmPatch(place, patch);
+      });
+  }
+
+  /**
    * Asks for confirmation, then deletes.
    *
    * <p>The dialog is what makes this safe: the row disappears for good, and a
@@ -198,6 +242,70 @@ export class PlaceListComponent {
   }
 
   // --- PRIVATE METHODS ---
+
+  /** Only the changed fields, or null when the values came back untouched. */
+  private buildPatch(place: PlaceResponse, result: QuickEditResult): PlacePatch | null {
+    const patch: PlacePatch = { id: place.id };
+
+    if (result.label !== place.label) {
+      patch.label = result.label;
+    }
+    if (result.location !== place.location) {
+      patch.location = result.location;
+    }
+
+    return patch.label === undefined && patch.location === undefined ? null : patch;
+  }
+
+  /** Second step: states what will change, and sends it if confirmed. */
+  private confirmPatch(place: PlaceResponse, patch: PlacePatch): void {
+    const changes: string[] = [];
+    if (patch.label !== undefined) {
+      changes.push(`Label: "${place.label}" → "${patch.label}"`);
+    }
+    if (patch.location !== undefined) {
+      changes.push(`Location: "${place.location}" → "${patch.location}"`);
+    }
+
+    const data: ConfirmDialogData = {
+      title: 'Apply changes',
+      // One change per line; the dialog renders the message with pre-line.
+      message: changes.join('\n'),
+      confirmLabel: 'Apply'
+    };
+
+    this.dialog
+      .open<ConfirmDialogComponent, ConfirmDialogData, true>(ConfirmDialogComponent, {
+        data,
+        width: '420px'
+      })
+      .afterClosed()
+      .pipe(
+        filter((confirmed) => confirmed === true),
+        switchMap(() => {
+          this.patchingId.set(place.id);
+          return this.http.patch<PlaceResponse>(this.endpoint, patch).pipe(
+            catchError((err: unknown) => {
+              console.error(err);
+              this.snack.open(this.toErrorMessage(err, 'saving the changes'), 'Close', {
+                duration: 5000
+              });
+              return EMPTY;
+            }),
+            finalize(() => this.patchingId.set(null))
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        this.snack.open('Changes saved.', 'Close', { duration: 3000 });
+        /*
+         * Reloaded rather than patched in memory: renaming a place moves it
+         * when the table is sorted by label, and only the server knows where.
+         */
+        this.reload();
+      });
+  }
 
   /**
    * Always sends `page`: the Spring controller routes on that parameter, and

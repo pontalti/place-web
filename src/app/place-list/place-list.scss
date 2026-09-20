@@ -83,6 +83,33 @@ td.mat-mdc-cell {
 .num {
   font-variant-numeric: tabular-nums;
 }
+
+/* Editable cell: a button that reads as text until it is hovered. */
+.cell-edit {
+  appearance: none;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin: -4px -8px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.cell-edit:hover:not(:disabled) {
+  border-color: rgb(0 0 0 / 20%);
+  background: rgb(0 0 0 / 3%);
+}
+.cell-edit:disabled {
+  cursor: default;
+}
+
+/* The row being saved or deleted. */
+tr.is-busy {
+  opacity: 0.5;
+  pointer-events: none;
+}
 .strong {
   font-weight: 500;
 }

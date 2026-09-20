@@ -43,14 +43,41 @@
           <td mat-cell *matCellDef="let row" class="col-id num">{{ row.place.id }}</td>
         </ng-container>
 
+        <!--
+          Label and location open the quick edit. A real button, not a cell
+          with a click handler: it is reachable by keyboard and announced as
+          an action.
+        -->
         <ng-container matColumnDef="label">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Label</th>
-          <td mat-cell *matCellDef="let row" class="strong">{{ row.place.label }}</td>
+          <td mat-cell *matCellDef="let row">
+            <button
+              type="button"
+              class="cell-edit strong"
+              [disabled]="patchingId() !== null"
+              (click)="quickEdit(row.place, 'label')"
+              matTooltip="Click to edit"
+              [attr.aria-label]="'Edit label of ' + row.place.label"
+            >
+              {{ row.place.label }}
+            </button>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="location">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Location</th>
-          <td mat-cell *matCellDef="let row" class="muted">{{ row.place.location }}</td>
+          <td mat-cell *matCellDef="let row">
+            <button
+              type="button"
+              class="cell-edit muted"
+              [disabled]="patchingId() !== null"
+              (click)="quickEdit(row.place, 'location')"
+              matTooltip="Click to edit"
+              [attr.aria-label]="'Edit location of ' + row.place.label"
+            >
+              {{ row.place.location }}
+            </button>
+          </td>
         </ng-container>
 
         <!-- Not sortable: it is a nested collection, not a column of the place table. -->
@@ -105,7 +132,11 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          [class.is-busy]="patchingId() === row.place.id || deletingId() === row.place.id"
+        ></tr>
 
         <tr class="mat-mdc-row" *matNoDataRow>
           <td class="mat-mdc-cell empty" [attr.colspan]="displayedColumns.length">

@@ -19,7 +19,7 @@ import {
 } from '@angular/forms';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Observable, finalize } from 'rxjs';
+import { Observable, filter, finalize } from 'rxjs';
 import { JsonPipe } from '@angular/common';
 
 import { MatCardModule } from '@angular/material/card';
@@ -29,6 +29,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
@@ -42,6 +43,7 @@ import {
   PlacePayload,
   PlaceResponse
 } from '../models/place.model';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../shared/confirm-dialog';
 import { DayForm, PlaceForm, TimeSlot } from './place-form.types';
 
 const HHMM_PATTERN = /^(\d{2}):(\d{2})$/;
@@ -70,6 +72,7 @@ const HHMM_PATTERN = /^(\d{2}):(\d{2})$/;
 export class PlaceFormComponent {
   private readonly http = inject(HttpClient);
   private readonly snack = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -99,6 +102,9 @@ export class PlaceFormComponent {
    * not proxy it.
    */
   private rendered = false;
+
+  /** The place as the server last returned it, used by the change summary. */
+  private original: PlaceResponse | null = null;
 
   /**
    * Stable identity for each slot, used by the @for `track`.
@@ -141,6 +147,8 @@ export class PlaceFormComponent {
       const raw = params.get('id');
       const parsed = raw === null ? Number.NaN : Number(raw);
       this.placeId.set(Number.isInteger(parsed) ? parsed : null);
+      // Another place (or a new one): the previous values no longer describe it.
+      this.original = null;
       this.resetForm();
       this.loadPlace();
     });
@@ -168,11 +176,24 @@ export class PlaceFormComponent {
 
   /**
    * Clears a new place, or brings an edited one back to what the server has.
+   *
+   * <p>While editing, this throws away work that is not saved anywhere, so it
+   * asks first — but only when there is something to lose: on an untouched
+   * form the dialog would be noise.
    */
   reset(): void {
     if (this.saving() || this.loading()) return;
-    this.resetForm();
-    this.loadPlace();
+
+    if (!this.isEdit() || !this.form.dirty) {
+      this.applyReset();
+      return;
+    }
+
+    this.confirm({
+      title: 'Discard changes',
+      message: 'Your unsaved changes will be lost and the form reloaded from the server.',
+      confirmLabel: 'Discard'
+    }).subscribe(() => this.applyReset());
   }
 
   /** Clears the form without the `saving` guard — also used after the POST. */
@@ -212,7 +233,72 @@ export class PlaceFormComponent {
 
     if (this.saving() || this.loading()) return; // guards against double click / repeated Enter
 
-    const editing = this.isEdit();
+    if (!this.isEdit()) {
+      this.send(false);
+      return;
+    }
+
+    /*
+     * An update overwrites a record that already exists, and the PUT replaces
+     * the opening hours wholesale, so the summary states what the server will
+     * end up with before anything is sent.
+     */
+    this.confirm({
+      title: 'Save changes',
+      message: this.changeSummary(),
+      confirmLabel: 'Save'
+    }).subscribe(() => this.send(true));
+  }
+
+  // --- PRIVATE METHODS AND VALIDATORS ---
+
+  /** Opens the shared confirm dialog and emits only when it is confirmed. */
+  private confirm(data: ConfirmDialogData): Observable<true> {
+    return this.dialog
+      .open<ConfirmDialogComponent, ConfirmDialogData, true>(ConfirmDialogComponent, {
+        data,
+        width: '420px'
+      })
+      .afterClosed()
+      .pipe(
+        filter((confirmed): confirmed is true => confirmed === true),
+        takeUntilDestroyed(this.destroyRef)
+      );
+  }
+
+  /**
+   * One line per field that differs from what was loaded, plus the opening
+   * hours, which the PUT always replaces.
+   */
+  private changeSummary(): string {
+    const { label, location, days } = this.form.getRawValue();
+    const before = this.original;
+
+    if (before === null) {
+      return 'The place will be overwritten with the values in the form.';
+    }
+
+    const lines: string[] = [];
+    if (label !== before.label) {
+      lines.push(`Label: "${before.label}" → "${label}"`);
+    }
+    if (location !== before.location) {
+      lines.push(`Location: "${before.location}" → "${location}"`);
+    }
+    if (lines.length === 0) {
+      lines.push(`Place: "${before.label}"`);
+    }
+
+    // Always stated: the collection is replaced, even when the count matches.
+    lines.push(
+      `Opening hours: ${before.days.length} → ${days.length} slot(s), replaced entirely`
+    );
+
+    return lines.join('\n');
+  }
+
+  /** Sends the request and handles what follows. */
+  private send(editing: boolean): void {
     this.saving.set(true);
 
     this.request()
@@ -226,7 +312,7 @@ export class PlaceFormComponent {
           if (editing) {
             // Nothing left to do on this screen; the list shows the result.
             this.snack.open('Changes saved!', 'Close', { duration: 3000 });
-            void this.router.navigate(['/place/grid']);
+            void this.router.navigate(['/place/list']);
             return;
           }
           this.resetForm();
@@ -239,7 +325,11 @@ export class PlaceFormComponent {
       });
   }
 
-  // --- PRIVATE METHODS AND VALIDATORS ---
+  /** Clears the form and, while editing, loads the stored values again. */
+  private applyReset(): void {
+    this.resetForm();
+    this.loadPlace();
+  }
 
   /** POST for a new place, PUT for an existing one. */
   private request(): Observable<PlaceResponse> {
@@ -270,7 +360,7 @@ export class PlaceFormComponent {
           this.snack.open(this.toErrorMessage(err), 'Close', { duration: 5000 });
           if (err instanceof HttpErrorResponse && err.status === 404) {
             // Editing something that is gone: back to the list.
-            void this.router.navigate(['/place/grid']);
+            void this.router.navigate(['/place/list']);
           }
         }
       });
@@ -278,6 +368,9 @@ export class PlaceFormComponent {
 
   /** Rebuilds the form from the loaded place. */
   private fillForm(place: PlaceResponse): void {
+    // Kept for the change summary shown before the update is sent.
+    this.original = place;
+
     this.form.patchValue({ label: place.label, location: place.location });
 
     this.days.clear();

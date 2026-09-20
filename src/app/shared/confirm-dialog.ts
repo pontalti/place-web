@@ -27,9 +27,15 @@ export interface ConfirmDialogData {
   standalone: true,
   imports: [MatDialogModule, MatButtonModule],
   changeDetection: ChangeDetectionStrategy.Eager,
+  /* pre-line so a message can list one change per line. */
+  styles: `
+    .message {
+      white-space: pre-line;
+    }
+  `,
   template: `
     <h2 mat-dialog-title>{{ data.title }}</h2>
-    <mat-dialog-content>{{ data.message }}</mat-dialog-content>
+    <mat-dialog-content class="message">{{ data.message }}</mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-stroked-button type="button" (click)="dialogRef.close()">Cancel</button>
       <button mat-raised-button color="warn" type="button" (click)="dialogRef.close(true)">
